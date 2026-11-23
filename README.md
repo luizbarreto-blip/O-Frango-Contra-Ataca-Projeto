@@ -1,2 +1,3 @@
-# O-Frango-Contra-Ataca-Projeto
-Projeto de um jogo rpg com tema de supermercado
+- Nome do jogo: O Frango Contra-Ataca
+- Integrantes: Luiz Guilherme, Carla Cristina, Ana vitória
+- Descrição do jogo: O Frango Contra-Ataca é um jogo com temática RPG em um supermercado, no qual o personagem principal é um funcionário que tem que sobreviver ao turno da noite e os inimigos são os produtos/itens do supermercado que ganharam vida. 
