@@ -1,1 +1,513 @@
+package mercado.personagens;
 
+public abstract class Personagem {
+
+    private final String nome;
+    private int vida;
+    private final int vidaMaxima;
+
+    public Personagem(String nome, int vidaMaxima) {
+
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException(
+                "O nome não pode ser vazio."
+            );
+        }
+
+        if (vidaMaxima <= 0) {
+            throw new IllegalArgumentException(
+                "A vida máxima deve ser positiva."
+            );
+        }
+
+        this.nome = nome;
+        this.vidaMaxima = vidaMaxima;
+        this.vida = vidaMaxima;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public int getVida() {
+        return vida;
+    }
+
+    public int getVidaMaxima() {
+        return vidaMaxima;
+    }
+
+    public boolean estaVivo() {
+        return vida > 0;
+    }
+
+    public void receberDano(int dano) {
+
+        if (dano < 0) {
+            throw new IllegalArgumentException(
+                "O dano não pode ser negativo."
+            );
+        }
+
+        vida = Math.max(0, vida - dano);
+
+        System.out.println(
+            nome + " recebeu " + dano + " de dano."
+        );
+
+        System.out.println(
+            "Vida: " + vida + "/" + vidaMaxima
+        );
+    }
+
+    public void curar(int quantidade) {
+
+        if (quantidade < 0) {
+            throw new IllegalArgumentException(
+                "A cura não pode ser negativa."
+            );
+        }
+
+        vida = Math.min(
+            vidaMaxima,
+            vida + quantidade
+        );
+    }
+
+    public abstract void atacar(Personagem alvo);
+}
+
+
+
+
+
+package mercado.personagens;
+
+public class Frango extends Personagem {
+
+    private static final int DANO_NORMAL = 15;
+    private static final int DANO_ESPECIAL = 30;
+
+    private static final int ENERGIA_NECESSARIA = 30;
+
+    private int energia;
+
+    public Frango() {
+        this("Frango Congelado");
+    }
+
+    public Frango(String nome) {
+        super(nome, 100);
+
+        this.energia = 0;
+    }
+
+    public int getEnergia() {
+        return energia;
+    }
+
+    @Override
+    public void atacar(Personagem alvo) {
+
+        System.out.println(
+            "O frango dá uma bicada!"
+        );
+
+        alvo.receberDano(DANO_NORMAL);
+    }
+
+    public boolean usarTemperoEspecial(Personagem alvo) {
+
+        if (energia < ENERGIA_NECESSARIA) {
+
+            System.out.println(
+                "Energia insuficiente!"
+            );
+
+            return false;
+        }
+
+        energia -= ENERGIA_NECESSARIA;
+
+        System.out.println(
+            "TEMPEROOOO ESPECIAL!"
+        );
+
+        alvo.receberDano(DANO_ESPECIAL);
+
+        return true;
+    }
+
+    public void ganharEnergia(int quantidade) {
+
+        if (quantidade < 0) {
+            throw new IllegalArgumentException(
+                "A energia não pode ser negativa."
+            );
+        }
+
+        energia += quantidade;
+
+        System.out.println(
+            "Energia atual: " + energia
+        );
+    }
+}
+
+
+
+
+
+
+package mercado.inimigos;
+
+import mercado.personagens.Personagem;
+
+public abstract class Inimigo extends Personagem {
+
+    private final int danoAtaque;
+
+    public Inimigo(
+        String nome,
+        int vida,
+        int danoAtaque
+    ) {
+
+        super(nome, vida);
+
+        if (danoAtaque < 0) {
+            throw new IllegalArgumentException(
+                "O dano não pode ser negativo."
+            );
+        }
+
+        this.danoAtaque = danoAtaque;
+    }
+
+    protected int getDanoAtaque() {
+        return danoAtaque;
+    }
+}
+
+
+
+
+
+
+package mercado.inimigos;
+
+import mercado.personagens.Personagem;
+
+public class CenouraMutante extends Inimigo {
+
+    public CenouraMutante() {
+        super("Cenoura Mutante", 30, 8);
+    }
+
+    @Override
+    public void atacar(Personagem alvo) {
+
+        System.out.println(
+            "A Cenoura Mutante dispara uma folha afiada!"
+        );
+
+        alvo.receberDano(getDanoAtaque());
+    }
+}
+
+
+
+
+
+
+
+
+package mercado.inimigos;
+
+import mercado.personagens.Personagem;
+
+public class CarrinhoMaluco extends Inimigo {
+
+    public CarrinhoMaluco() {
+        super("Carrinho Maluco", 60, 12);
+    }
+
+    @Override
+    public void atacar(Personagem alvo) {
+
+        System.out.println(
+            "O Carrinho Maluco avança fazendo BIP BIP!"
+        );
+
+        alvo.receberDano(getDanoAtaque());
+    }
+}
+
+
+
+
+
+package mercado.inimigos;
+
+import mercado.personagens.Personagem;
+
+public class Gerente extends Inimigo {
+
+    public Gerente() {
+        super("Gerente do Mercado", 100, 15);
+    }
+
+    @Override
+    public void atacar(Personagem alvo) {
+
+        System.out.println(
+            "O Gerente lança uma promoção imperdível!"
+        );
+
+        alvo.receberDano(getDanoAtaque());
+    }
+}
+
+
+
+
+
+package mercado.combate;
+
+import java.util.Scanner;
+
+import mercado.inimigos.Inimigo;
+import mercado.personagens.Frango;
+
+public class Combate {
+
+    private final Scanner scanner;
+
+    public Combate(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public boolean iniciarCombate(
+        Frango frango,
+        Inimigo inimigo
+    ) {
+
+        System.out.println("\n========================");
+        System.out.println("COMBATE: " + inimigo.getNome());
+        System.out.println("========================");
+
+        while (
+            frango.estaVivo() &&
+            inimigo.estaVivo()
+        ) {
+
+            System.out.println("\n" + frango.getNome());
+            System.out.println("Vida: " + frango.getVida());
+            System.out.println("Energia: " + frango.getEnergia());
+
+            System.out.println("\n" + inimigo.getNome());
+            System.out.println("Vida: " + inimigo.getVida());
+
+            System.out.println("\n1 - Ataque normal");
+            System.out.println("2 - Tempero Especial");
+
+            System.out.print("Escolha sua ação: ");
+
+            int escolha = lerEscolha();
+
+            if (escolha == 1) {
+
+                frango.atacar(inimigo);
+
+            } else if (escolha == 2) {
+
+                frango.usarTemperoEspecial(inimigo);
+
+            } else {
+
+                System.out.println(
+                    "Opção inválida. Você perdeu o turno!"
+                );
+            }
+
+            if (inimigo.estaVivo()) {
+                inimigo.atacar(frango);
+            }
+        }
+
+        if (frango.estaVivo()) {
+
+            System.out.println(
+                "\nVocê derrotou " + inimigo.getNome() + "!"
+            );
+
+            frango.ganharEnergia(10);
+
+            return true;
+        }
+
+        System.out.println("\nO frango foi derrotado!");
+
+        return false;
+    }
+
+    private int lerEscolha() {
+
+        while (!scanner.hasNextInt()) {
+
+            System.out.print(
+                "Digite uma opção numérica: "
+            );
+
+            scanner.next();
+        }
+
+        return scanner.nextInt();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+package mercado.jogo;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import mercado.combate.Combate;
+
+import mercado.inimigos.CarrinhoMaluco;
+import mercado.inimigos.CenouraMutante;
+import mercado.inimigos.Gerente;
+import mercado.inimigos.Inimigo;
+
+import mercado.personagens.Frango;
+
+public class Jogo {
+
+    private final Scanner scanner;
+
+    public Jogo() {
+        scanner = new Scanner(System.in);
+    }
+
+    public void iniciar() {
+
+        System.out.println("==============================");
+        System.out.println("      O FRANGO CONTRA-ATACA");
+        System.out.println("==============================");
+
+        System.out.println(
+            "Um frango congelado decidiu escapar!"
+        );
+
+        System.out.print(
+            "\nDigite o nome do seu frango: "
+        );
+
+        String nome = scanner.nextLine().trim();
+
+        if (nome.isBlank()) {
+            nome = "Frango Congelado";
+        }
+
+        Frango frango = new Frango(nome);
+
+        List<Inimigo> inimigos = criarInimigos();
+
+        Combate combate = new Combate(scanner);
+
+        System.out.println(
+            "\nSua missão é derrotar todos os inimigos!"
+        );
+
+        while (
+            frango.estaVivo() &&
+            !inimigos.isEmpty()
+        ) {
+
+            Inimigo inimigoAtual = inimigos.get(0);
+
+            boolean venceu = combate.iniciarCombate(
+                frango,
+                inimigoAtual
+            );
+
+            if (!venceu) {
+                break;
+            }
+
+            inimigos.remove(inimigoAtual);
+
+            System.out.println(
+                "\nInimigos restantes: " + inimigos.size()
+            );
+        }
+
+        if (
+            frango.estaVivo() &&
+            inimigos.isEmpty()
+        ) {
+
+            System.out.println(
+                "\nO FRANGO VENCEU!"
+            );
+
+            System.out.println(
+                "O supermercado está livre!"
+            );
+
+        } else {
+
+            System.out.println(
+                "\nFIM DE JOGO!"
+            );
+        }
+
+        System.out.println(
+            "\nObrigado por jogar O Frango Contra-Ataca!"
+        );
+    }
+
+    private List<Inimigo> criarInimigos() {
+
+        List<Inimigo> inimigos = new ArrayList<>();
+
+        inimigos.add(new CenouraMutante());
+        inimigos.add(new CarrinhoMaluco());
+        inimigos.add(new Gerente());
+
+        return inimigos;
+    }
+}
+
+
+
+
+
+
+
+
+package mercado;
+
+import mercado.jogo.Jogo;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Jogo jogo = new Jogo();
+
+        jogo.iniciar();
+    }
+}
